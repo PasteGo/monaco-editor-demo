@@ -1,0 +1,15 @@
+{
+  "name": "monaco-editor-sample",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/PasteGo/monaco-editor-sample.git",
+  "author": "Dup4",
+  "license": "MIT",
+  "dependencies": {
+    "gulp": "^4.0.2",
+    "gulp-clean": "^0.4.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-html-minifier": "^0.1.8",
+    "merge-stream": "^2.0.0"
+  }
+}

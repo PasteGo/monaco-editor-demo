@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+
+    <style>
+        #btnList {
+            display: flex;
+        }
+
+        .d-btn {
+            width: 100px;
+            height: 32px;
+            background: #333;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            -webkit-transition: .7s;
+            transition: .7s;
+            cursor: pointer;
+            margin: 5px;
+            border-radius: 3px;
+        }
+
+        .d-btn:hover {
+            background: #f30
+        }
+
+        .monaco-editor {
+            width: 100%;
+            height: 720px;
+            overflow: hidden;
+            border-top: 1px solid #D4D4D5;
+            border-bottom: 1px solid #D4D4D5;
+            border-radius: 5px;
+        }
+
+        .output-alert {
+            margin: 5px;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid rgba(45, 112, 145, 0.3);
+            font-family: Consolas, monospace, serif;
+            word-break: break-all;
+            color: #2d7091;
+            border-radius: 4px;
+            text-shadow: 0 1px 0 #ffffff;
+            background: #ebf7fd;
+        }
+
+        .output-alert-danger {
+            background: #fff1f0;
+            color: #d85030;
+            border-color: rgba(216, 80, 48, 0.3);
+        }
+    </style>
+
+    <style>
+        .loading {
+            color: #555555;
+            font: 400 14px/1.4em "Segoe UI", "Open Sans", Calibri, Candara, Arial, sans-serif;
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: rgba(255, 255, 255, .5);
+            margin: 0 auto;
+            z-index: 999;
+        }
+
+        .progress {
+            color: #555555;
+            font: 400 14px/1.4em "Segoe UI", "Open Sans", Calibri, Candara, Arial, sans-serif;
+            overflow: hidden;
+            background-repeat: repeat-x;
+            height: 6px;
+            background-color: #eeeeee;
+            background-image: none;
+            border-radius: 0;
+            box-shadow: none;
+            width: 50%;
+            margin: 15% auto 0;
+        }
+
+        .bar {
+            font: 400 14px/1.4em "Segoe UI", "Open Sans", Calibri, Candara, Arial, sans-serif;
+            float: left;
+            height: 100%;
+            font-size: 12px;
+            color: #ffffff;
+            text-align: center;
+            text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+            background-repeat: repeat-x;
+            box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+            box-sizing: border-box;
+            transition: width 0.6s ease;
+            background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+            background-size: 40px 40px;
+            animation: progress-bar-stripes 2s linear infinite;
+            width: 100%;
+            background-color: #4bb1cf;
+        }
+
+        .loading-frame {
+            height: 680px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checkbox {
+            min-height: 20px;
+            padding-left: 20px;
+        }
+
+        @media (min-width: 1200px) {
+            .span3 {
+                width: 270px;
+            }
+
+            .span4 {
+                width: 370px;
+            }
+
+            .span9 {
+                width: 870px;
+            }
+
+            [class*="span"] {
+                float: left;
+                min-height: 1px;
+                margin-left: 30px;
+            }
+        }
+
+        [class*="span"] {
+            float: left;
+            min-height: 1px;
+            margin-left: 20px;
+        }
+
+        .span3 {
+            width: 220px;
+        }
+
+        .span4 {
+            width: 300px;
+        }
+
+        .span9 {
+            width: 700px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div style="width:100%; display:flex; justify-content: center; align-items: center;">
+        <div id="monaco-editor-root" style="width:86%; max-width: 1440px;">
+
+            <div class="loading-frame">
+                <div class="loading"
+                    style="display:flex; height:calc(100vh); width:680px; align-items:center; justify-content:center;">
+                    <div class="progress progress-striped">
+                        <div class="bar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="main-content" style="display:none;">
+                <div id="btnList" style="margin-bottom:10px;">
+                    <div class="d-btn" onclick='getSample()'>文本编辑</div>
+                    <div class="d-btn" onclick='getDiffSample()'>文本对比</div>
+                </div>
+
+                <div class="row">
+                    <div class="span4">
+                        <label class="control-label">Language</label>
+                        <select class="language-picker">
+                        </select>
+                    </div>
+                    <div class="span4">
+                        <label class="control-label">Theme</label>
+                        <select class="theme-picker">
+                            <option>Visual Studio</option>
+                            <option>Visual Studio Dark</option>
+                            <option>High Contrast Dark</option>
+                        </select>
+                    </div>
+                    <div class="span4">
+                        <div class="checkbox">
+                            <label class="control-label">
+                                <input id="inline-diff-checkbox" type="checkbox" value=""> Inline diff
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <br />
+                <br />
+
+                <div id="monaco-editor" class="monaco-editor" style="margin-left:5px;"></div>
+                <div id="monaco-diff-editor" class="monaco-editor" style="margin-left:5px;"></div>
+
+                <div id="run" style="margin-top:10px;">
+                    <div id="btnList">
+                        <div class="d-btn" onclick='execute_javascript("output", this)'>RUN</div>
+                    </div>
+                    <div id="output" class="output-alert">(no output)</div>
+                </div>
+            </div>
+            <div class="footer">
+                <div
+                    style="font-size: 15px; margin:0 auto;padding:20px 0; bottom: 0px; right: 1%;  display:flex; justify-content: center; align-items: center;">
+                    <div id="year">--</div>@All Rights Researved.
+                    <a target="_blank" href="http://www.beian.miit.gov.cn/"
+                        style="display:inline-block;text-decoration:none;height:20px;line-height:20px">
+                        <p id="beianID"
+                            style="font-size: 12px; float:left;height:20px;line-height:20px;margin:0 0 0 5px;color:#939393">
+                            --</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+<script>
+    var CurYear = (new Date()).getFullYear();
+    if (parseInt(CurYear) > 2020) {
+        CurYear = "2020-" + CurYear;
+    }
+    $("#year").html(CurYear);
+    $.getJSON("./config.json", (data) => {
+        $("#beianID").html(data["beianID"]);
+    });
+</script>
+
+<script>
+
+    function encodeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function execute_javascript(tid, btn) {
+        var code = getCode(tid);
+        (function () {
+            var
+                buffer = '',
+                _log = function (s) {
+                    console.log(s);
+                    buffer = buffer + s + '\n';
+                },
+                _warn = function (s) {
+                    console.warn(s);
+                    buffer = buffer + s + '\n';
+                },
+                _error = function (s) {
+                    console.error(s);
+                    buffer = buffer + s + '\n';
+                },
+                _console = {
+                    trace: _log,
+                    debug: _log,
+                    log: _log,
+                    info: _log,
+                    warn: _warn,
+                    error: _error
+                };
+            try {
+                eval('(function() {\n var console = _console; \n' + code + '\n})();');
+                if (!buffer) {
+                    buffer = '(no output)';
+                }
+                showCodeResult(btn, buffer);
+            } catch (e) {
+                buffer = buffer + String(e);
+                showCodeError(btn, buffer);
+            }
+        })();
+    }
+
+    function getCode(tid) {
+        if (meditor) {
+            return meditor.getValue();
+        } else {
+            return ' ';
+        }
+    }
+
+    function setCodeResult(btn, result, isHtml, isError) {
+        var $r = $("#output");
+        $r.removeClass('output-alert-danger');
+        if (isError) {
+            $r.addClass('output-alert-danger');
+        }
+        if (isHtml) {
+            $r.html(result);
+        } else {
+            var ss = result.split('\n');
+            var htm = _.map(ss, function (s) {
+                return encodeHtml(s).replace(/ /g, '&nbsp;');
+            }).join('<br>');
+            $r.html(htm);
+        }
+    }
+
+    function showCodeResult(btn, result, isHtml) {
+        setCodeResult(btn, result, isHtml);
+    }
+
+    function showCodeError(btn, result, isHtml) {
+        setCodeResult(btn, result, isHtml, true);
+    }
+
+</script>
+
+<script>
+    function init() {
+        $("#monaco-editor").hide();
+        $("#monaco-diff-editor").hide();
+        $("#run").hide();
+    }
+    init();
+
+    function getSample() {
+        init();
+        $("#monaco-editor").show();
+        loadSample(MODES[$(".language-picker")[0].selectedIndex]);
+    }
+
+    function getDiffSample() {
+        init();
+        $("#monaco-diff-editor").show();
+        loadDiffSample(MODES[$(".language-picker")[0].selectedIndex]);
+    }
+
+    function loadSample(mode) {
+        var language = mode.modeId || 'javascript';
+        if (!meditor) {
+            var editorElement = document.getElementById('monaco-editor');
+            editorElement.innerHTML = "";
+            var content = "";
+            meditor = monaco.editor.create(editorElement, {
+                value: content,
+                language: language,
+                multicursorModifier: 'ctrlCmd',
+                cursorWidth: 1,
+                theme: 'vs',
+                lineHeight: 20,
+                fontSize: 12,
+                fontFamily: "'Fira Mono', 'Bitstream Vera Sans Mono', 'Menlo', 'Consolas', 'Lucida Console', 'Source Han Sans SC', 'Noto Sans CJK SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft Yahei', monospace",
+                lineNumbersMinChars: 4,
+                glyphMargin: false,
+                renderFinalNewline: true,
+                scrollbar: {
+                    useShadows: false,
+                    verticalScrollbarSize: 0,
+                    horizontalScrollbarSize: 2,
+                    vertical: 'hidden'
+                },
+                overviewRulerBorder: false,
+                hideCursorInOverviewRuler: true,
+                contextmenu: false,
+                enableSplitViewResizing: false
+            });
+        }
+        if (mode) {
+            var oldModel = meditor.getModel();
+            var newModel = monaco.editor.createModel("", language);
+            meditor.setModel(newModel);
+            if (oldModel) {
+                oldModel.dispose();
+            }
+        }
+        $.get(["./samples/sample", language, "txt"].join("."), (data, err) => {
+            content = data;
+            if (meditor) {
+                meditor.setValue(content);
+            }
+        });
+        if (["javascript", "typescript"].indexOf(language) !== -1) {
+            $("#run").show();
+        } else {
+            $("#run").hide();
+        }
+    }
+
+    var lhsData = null, rhsData = null;
+    var lhsModel = null, rhsModel = null;
+    function loadDiffSample(mode) {
+        var language = mode.modeId || "javascript";
+        if (!diffMeditor) {
+            var editorElement = document.getElementById('monaco-diff-editor');
+            diffMeditor = monaco.editor.createDiffEditor(editorElement, {
+                multicursorModifier: 'ctrlCmd',
+                cursorWidth: 1,
+                theme: 'vs',
+                lineHeight: 20,
+                fontSize: 12,
+                fontFamily: "'Fira Mono', 'Bitstream Vera Sans Mono', 'Menlo', 'Consolas', 'Lucida Console', 'Source Han Sans SC', 'Noto Sans CJK SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft Yahei', monospace",
+                lineNumbersMinChars: 4,
+                glyphMargin: false,
+                renderFinalNewline: true,
+                scrollbar: {
+                    useShadows: false,
+                    verticalScrollbarSize: 0,
+                    horizontalScrollbarSize: 2,
+                    vertical: 'hidden'
+                },
+                overviewRulerBorder: false,
+                hideCursorInOverviewRuler: true,
+                contextmenu: false,
+                enableSplitViewResizing: false,
+                originalEditable: true, // for left pane
+                // readOnly: true,         // for right pane
+            });
+
+            var lhsModel = monaco.editor.createModel("", language);
+            var rhsModel = monaco.editor.createModel("", language);
+
+            diffMeditor.setModel({
+                original: lhsModel,
+                modified: rhsModel
+            });
+
+        }
+
+        diffMeditor.updateOptions({
+            renderSideBySide: !$('#inline-diff-checkbox').is(':checked')
+        });
+
+        var _lhsData = "", _rhsData = "";
+
+        if (language === "javascript") {
+            if (lhsData && rhsData) {
+                _lhsData = lhsData;
+                _rhsData = rhsData;
+                onProgress();
+            } else {
+                $.get("./samples/diff.lhs.txt", (data, err) => {
+                    lhsData = data;
+                    _lhsData = data;
+                    $.get("./samples/diff.rhs.txt", (data, err) => {
+                        rhsData = data;
+                        _rhsData = data;
+                        onProgress();
+                    });
+                });
+            }
+        } else {
+            onProgress();
+        }
+
+        function onProgress() {
+            var _lhsModel = monaco.editor.createModel(_lhsData, language);
+            var _rhsModel = monaco.editor.createModel(_rhsData, language);
+
+            diffMeditor.setModel({
+                original: _lhsModel,
+                modified: _rhsModel
+            });
+
+            if (lhsModel) lhsModel.dispose();
+            if (rhsModel) rhsModel.dispose();
+
+            lhsModel = _lhsModel;
+            rhsModel = _rhsModel;
+
+        }
+    }
+
+    var meditor = null, diffMeditor = null;
+    var MODES = [];
+
+    window.onresize = function () {
+        if (meditor) {
+            meditor.layout();
+        }
+        if (diffMeditor) {
+            diffMeditor.layout();
+        }
+    };
+
+    function changeTheme(theme) {
+        var newTheme = (theme === 1 ? 'vs-dark' : (theme === 0 ? 'vs' : 'hc-black'));
+        monaco.editor.setTheme(newTheme);
+    }
+
+    $.getScript("https://cdn.jsdelivr.net/npm/underscore@1.10.2/underscore-min.js", () => {
+        $.getScript("https://cdn.jsdelivr.net/npm/monaco-editor@0.20.0/min/vs/loader.js", () => {
+
+            require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.20.0/min/vs' } });
+            require(['vs/editor/editor.main'], () => {
+
+                $(".loading-frame").hide();
+                $("#main-content").show();
+                $(".theme-picker").change(function () {
+                    changeTheme(this.selectedIndex);
+                });
+
+                MODES = (function () {
+                    var modesIds = monaco.languages.getLanguages().map((lang) => lang.id);
+                    modesIds.sort();
+                    return modesIds.map(function (modeId) {
+                        return {
+                            modeId: modeId
+                        };
+                    });
+                })();
+
+                var startModeIndex = 0;
+
+                for (var i = 0; i < MODES.length; i++) {
+                    var o = document.createElement('option');
+                    o.textContent = MODES[i].modeId;
+                    if (MODES[i].modeId === 'javascript') {
+                        startModeIndex = i;
+                    }
+                    $(".language-picker").append(o);
+                }
+
+                $(".language-picker")[0].selectedIndex = startModeIndex;
+
+                $(".language-picker").change(function () {
+                    if ($("#monaco-editor").is(":hidden")) {
+                        loadDiffSample(MODES[this.selectedIndex]);
+                    } else {
+                        loadSample(MODES[this.selectedIndex]);
+                    }
+                });
+
+                $('#inline-diff-checkbox').change(function () {
+                    if (diffMeditor) {
+                        diffMeditor.updateOptions({
+                            renderSideBySide: !$(this).is(':checked')
+                        });
+                    }
+                });
+
+                getSample();
+
+            });
+        });
+    })
+</script>
+
+
+</html>
