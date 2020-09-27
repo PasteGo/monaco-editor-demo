@@ -13,7 +13,7 @@ Go to `dest/index.html` and explore the sample.
 
 If you use the file protocol to access the Demo, it will not be able to load `sample.*.txt`。
 
-We Sincerely recommend you use a web container to run it, such as `Nginx`。
+We sincerely recommend you use a web container to run it, such as `Nginx`。
 
 ## Editor
 
