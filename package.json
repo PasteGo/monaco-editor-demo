@@ -6,10 +6,13 @@
   "author": "Dup4",
   "license": "MIT",
   "dependencies": {
+    "clean-css": "4.1.11",
     "gulp": "^4.0.2",
     "gulp-clean": "^0.4.0",
     "gulp-concat": "^2.6.1",
     "gulp-html-minifier": "^0.1.8",
-    "merge-stream": "^2.0.0"
+    "lodash": "4.17.12",
+    "merge-stream": "^2.0.0",
+    "yargs-parser": "^13.1.2"
   }
 }
