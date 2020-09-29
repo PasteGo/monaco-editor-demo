@@ -4,15 +4,15 @@ const concat     = require('gulp-concat');
 const htmlmin    = require('gulp-html-minifier');
 const merge      = require('merge-stream');
 
-const destDIR = "./dest";
+const distDIR = "./dist";
 
 function cleanFile(source) {
     return gulp.src(source)
                .pipe(clean({force: true}));
 }
 
-function cleanDest() {
-    return cleanFile([destDIR + "/*"]);
+function cleanDist() {
+    return cleanFile([distDIR + "/*"]);
 }
 
 function htmlMin(source, destion) {
@@ -32,23 +32,23 @@ function htmlMin(source, destion) {
 }
 
 function gao() {
-    return htmlMin("./src/*.html", destDIR);
+    return htmlMin("./src/*.html", distDIR);
 }
 
 function copy() {
     return merge([
-        {"src": "./src/samples/**/*", "dest": "./dest/samples"},
-        {"src": "./src/config.json", "dest": "./dest"}
+        {"src": "./src/samples/**/*", "dist": distDIR + "/samples"},
+        {"src": "./src/config.json", "dist": distDIR}
     ].map((item) => {
-        return gulp.src(item.src).pipe(gulp.dest(item.dest));
+        return gulp.src(item.src).pipe(gulp.dest(item.dist));
     }));
 }
 
-exports.cleanDest = cleanDest;
+exports.cleanDist = cleanDist;
 exports.gao = gao;
 exports.copy = copy;
 exports.default = gulp.series(
-    cleanDest, 
+    cleanDist, 
     gulp.parallel(gao, copy)
 );
 

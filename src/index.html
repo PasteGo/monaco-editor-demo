@@ -233,17 +233,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
 
 <script>
-    var CurYear = (new Date()).getFullYear();
-    if (parseInt(CurYear) > 2020) {
-        CurYear = "2020-" + CurYear;
-    }
-    $("#year").html(CurYear);
-    $.getJSON("./config.json", (data) => {
-        $("#beianID").html(data["beianID"]);
-    });
-</script>
-
-<script>
 
     function encodeHtml(str) {
         return String(str)
@@ -328,12 +317,12 @@
 </script>
 
 <script>
+
     function init() {
         $("#monaco-editor").hide();
         $("#monaco-diff-editor").hide();
         $("#run").hide();
     }
-    init();
 
     function getSample() {
         init();
@@ -404,10 +393,12 @@
         var language = mode.modeId || "javascript";
         if (!diffMeditor) {
             var editorElement = document.getElementById('monaco-diff-editor');
+            var themeId = $(".theme-picker").get(0).selectedIndex;
+            var newTheme = (themeId === 1 ? 'vs-dark' : (themeId === 0 ? 'vs' : 'hc-black'));
             diffMeditor = monaco.editor.createDiffEditor(editorElement, {
                 multicursorModifier: 'ctrlCmd',
                 cursorWidth: 1,
-                theme: 'vs',
+                theme: newTheme || 'vs',
                 lineHeight: 20,
                 fontSize: 12,
                 fontFamily: "'Fira Mono', 'Bitstream Vera Sans Mono', 'Menlo', 'Consolas', 'Lucida Console', 'Source Han Sans SC', 'Noto Sans CJK SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft Yahei', monospace",
@@ -482,79 +473,100 @@
         }
     }
 
+</script>
+
+<script>
+
     var meditor = null, diffMeditor = null;
     var MODES = [];
-
-    window.onresize = function () {
-        if (meditor) {
-            meditor.layout();
-        }
-        if (diffMeditor) {
-            diffMeditor.layout();
-        }
-    };
 
     function changeTheme(theme) {
         var newTheme = (theme === 1 ? 'vs-dark' : (theme === 0 ? 'vs' : 'hc-black'));
         monaco.editor.setTheme(newTheme);
     }
 
-    $.getScript("https://cdn.jsdelivr.net/npm/underscore@1.10.2/underscore-min.js", () => {
-        $.getScript("https://cdn.jsdelivr.net/npm/monaco-editor@0.20.0/min/vs/loader.js", () => {
+    (function() {
 
-            require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.20.0/min/vs' } });
-            require(['vs/editor/editor.main'], () => {
-
-                $(".loading-frame").hide();
-                $("#main-content").show();
-                $(".theme-picker").change(function () {
-                    changeTheme(this.selectedIndex);
-                });
-
-                MODES = (function () {
-                    var modesIds = monaco.languages.getLanguages().map((lang) => lang.id);
-                    modesIds.sort();
-                    return modesIds.map(function (modeId) {
-                        return {
-                            modeId: modeId
-                        };
-                    });
-                })();
-
-                var startModeIndex = 0;
-
-                for (var i = 0; i < MODES.length; i++) {
-                    var o = document.createElement('option');
-                    o.textContent = MODES[i].modeId;
-                    if (MODES[i].modeId === 'javascript') {
-                        startModeIndex = i;
-                    }
-                    $(".language-picker").append(o);
-                }
-
-                $(".language-picker")[0].selectedIndex = startModeIndex;
-
-                $(".language-picker").change(function () {
-                    if ($("#monaco-editor").is(":hidden")) {
-                        loadDiffSample(MODES[this.selectedIndex]);
-                    } else {
-                        loadSample(MODES[this.selectedIndex]);
-                    }
-                });
-
-                $('#inline-diff-checkbox').change(function () {
-                    if (diffMeditor) {
-                        diffMeditor.updateOptions({
-                            renderSideBySide: !$(this).is(':checked')
-                        });
-                    }
-                });
-
-                getSample();
-
-            });
+        var CurYear = (new Date()).getFullYear();
+        if (parseInt(CurYear) > 2020) {
+            CurYear = "2020-" + CurYear;
+        }
+        $("#year").html(CurYear);
+        $.getJSON("./config.json", (data) => {
+            $("#beianID").html(data["beianID"]);
         });
-    })
+
+        init();
+
+        window.onresize = function () {
+            if (meditor) {
+                meditor.layout();
+            }
+            if (diffMeditor) {
+                diffMeditor.layout();
+            }
+        };
+
+        $.getScript("https://cdn.jsdelivr.net/npm/underscore@1.10.2/underscore-min.js", () => {
+            $.getScript("https://cdn.jsdelivr.net/npm/monaco-editor@0.20.0/min/vs/loader.js", () => {
+
+                require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.20.0/min/vs' } });
+                require(['vs/editor/editor.main'], () => {
+
+                    $(".loading-frame").hide();
+                    $("#main-content").show();
+                    $(".theme-picker").change(function () {
+                        changeTheme(this.selectedIndex);
+                    });
+
+                    MODES = (function () {
+                        var modesIds = monaco.languages.getLanguages().map((lang) => lang.id);
+                        modesIds.sort();
+                        return modesIds.map(function (modeId) {
+                            return {
+                                modeId: modeId
+                            };
+                        });
+                    })();
+
+                    var startModeIndex = 0;
+
+                    for (var i = 0; i < MODES.length; i++) {
+                        var o = document.createElement('option');
+                        o.textContent = MODES[i].modeId;
+                        if (MODES[i].modeId === 'javascript') {
+                            startModeIndex = i;
+                        }
+                        $(".language-picker").append(o);
+                    }
+
+                    $(".language-picker")[0].selectedIndex = startModeIndex;
+
+                    $(".language-picker").change(function () {
+                        if ($("#monaco-editor").is(":hidden")) {
+                            loadDiffSample(MODES[this.selectedIndex]);
+                        } else {
+                            loadSample(MODES[this.selectedIndex]);
+                        }
+                    });
+
+                    $('#inline-diff-checkbox').change(function () {
+                        if (diffMeditor) {
+                            diffMeditor.updateOptions({
+                                renderSideBySide: !$(this).is(':checked')
+                            });
+                        }
+                    });
+
+                    getSample();
+
+                });
+            });
+        })
+
+    })();
+
+
 </script>
 
 
