@@ -192,18 +192,14 @@
 
             MODES = (() => monaco.languages.getLanguages().map((lang) => lang.id).sort().map(function (modeId) { return { modeId: modeId }; }) )();
 
-            var startModeIndex = 0;
-
-            for (var i = 0; i < MODES.length; i++) {
-                var o = document.createElement('option');
-                o.textContent = MODES[i].modeId;
-                if (MODES[i].modeId === 'javascript') {
-                    startModeIndex = i;
-                }
+            MODES.forEach((item, i) => {
+                let o = document.createElement('option');
+                o.textContent = item.modeId;
                 $(".language-picker").append(o);
-            }
-
-            $(".language-picker")[0].selectedIndex = startModeIndex;
+                if (item.modeId === 'javascript') {
+                    $(".language-picker")[0].selectedIndex = i;
+                }
+            })
 
             $(".language-picker").change(function () {
                 if ($("#monaco-editor").is(":hidden")) {
