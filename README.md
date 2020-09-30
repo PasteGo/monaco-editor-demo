@@ -17,7 +17,7 @@ We sincerely recommend you use a web container to run it, such as `Nginx`。
 
 ## Editor
 
-If you write some simple `javascript` or `typescript` code, you can run it.
+If you write some simple `javascript`, you can run it.
 
 ![editor](./screenshot/editor.png)
 
