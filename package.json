@@ -1,8 +1,8 @@
 {
-  "name": "monaco-editor-sample",
+  "name": "monaco-editor-demo",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/PasteGo/monaco-editor-sample.git",
+  "repository": "https://github.com/PasteGo/monaco-editor-demo.git",
   "author": "Dup4",
   "license": "MIT",
   "dependencies": {
