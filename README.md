@@ -9,7 +9,7 @@ A simple example of monaco-editor.
 git clone https://github.com/PasteGo/monaco-editor-sample.git
 ```
 
-Go to `dest/index.html` and explore the sample.
+Go to `dist/index.html` and explore the sample.
 
 If you use the file protocol to access the Demo, it will not be able to load `sample.*.txt`。
 
