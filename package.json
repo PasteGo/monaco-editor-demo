@@ -5,6 +5,9 @@
   "repository": "https://github.com/PasteGo/monaco-editor-demo.git",
   "author": "Dup4",
   "license": "MIT",
+  "scripts":{
+    "build": "gulp"
+  },
   "dependencies": {
     "clean-css": "4.1.11",
     "gulp": "^4.0.2",
